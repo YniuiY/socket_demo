@@ -4,7 +4,7 @@ project(Network)
 
 add_definitions("-Wall -g")
 
-set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 
 message("project binary dir: " ${CMAKE_SOURCE_DIR})
 

@@ -33,7 +33,7 @@ int main (int argc, char* argv[]) {
     server.Start();
   } else if (!is_unix_possible && h0.compare(argv[1]) == 0 && h4.compare(argv[2]) == 0) {
     // tcp client
-    std::string ip{"10.1.2.147"};
+    std::string ip{"172.17.62.118"};
     int port{51015};
     tcp::Client client(ip, port);
     client.Socket();
@@ -48,7 +48,7 @@ int main (int argc, char* argv[]) {
     server.Start();
   } else if (!is_unix_possible && h1.compare(argv[1]) == 0 && h4.compare(argv[2]) == 0) {
     // udp client
-    std::string ip{"10.1.2.147"};
+    std::string ip{"172.17.62.118"};
     int port{51016};
     udp::UdpClient client(ip, port);
     client.Socket();
