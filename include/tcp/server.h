@@ -2,6 +2,7 @@
 #define SERVER_H_
 
 #include "common/headers.h"
+#include "common/transfer.h"
 
 namespace tcp {
 

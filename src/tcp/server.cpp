@@ -218,7 +218,7 @@ int Server::in_epoll_recv(int socket_fd) {
     memset(packet_, 0, total_pack_size);
   }
 
-  int recv_header_size = recv(socket_fd, &packet_->header.data_size, sizeof(Packet), 0);
+  int recv_header_size = recvn(socket_fd, &packet_->header.data_size, sizeof(Packet), 0);
   if (recv_header_size != 0 && recv_header_size != sizeof(Packet::header)) {
     std::cerr << "[in_epoll_recv], recv header size: " << recv_header_size
               << ", not equal to " << sizeof(Packet::header) << std::endl;
@@ -233,7 +233,7 @@ int Server::in_epoll_recv(int socket_fd) {
   total_pack_size = packet_->header.data_size + sizeof(Packet::header);
   packet_ = (Packet*)realloc(packet_, total_pack_size);
   // 接收pack的数据部分
-  int recv_pack_data_size = recv(socket_fd, packet_->data, packet_->header.data_size, 0);
+  int recv_pack_data_size = recvn(socket_fd, packet_->data, packet_->header.data_size, 0);
   if (recv_pack_data_size != packet_->header.data_size) {
     std::cout << "[in_epoll_recv] recv pack data failed, need recv size: "
               << packet_->header.data_size
@@ -261,7 +261,7 @@ void Server::in_epoll_send(int socket_fd) {
   packet_->header.data_size = send_msg_str.size();
 
   total_pack_size = sizeof(Packet::header) + send_msg_str.size();
-  int send_pack_size = send(socket_fd, packet_, total_pack_size, 0);
+  int send_pack_size = sendn(socket_fd, packet_, total_pack_size, 0);
   if (send_pack_size != total_pack_size) {
     std::cerr << "Send pack failed, need send " << total_pack_size << " byte, real send: " << send_pack_size << " byte\n";
     exit(1);

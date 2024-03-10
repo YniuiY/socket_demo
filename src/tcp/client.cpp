@@ -1,4 +1,5 @@
 #include "tcp/client.h"
+#include "common/transfer.h"
 
 namespace tcp {
 
@@ -54,7 +55,7 @@ void Client::Send () {
   strcpy(packet_->data, msg.c_str());
   packet_->header.data_size = msg.size();
   printf("send msg: %s\n", packet_->data);
-  int send_num = send(socket_, packet_, pack_size, 0);
+  int send_num = sendn(socket_, packet_, pack_size, 0);
   if (send_num != pack_size) {
     std::cerr << "Send byte: " << send_num << ", real byte: " << pack_size << std::endl;
     exit(1);
@@ -82,7 +83,7 @@ void Client::Recv() {
     memset(packet_, 0, pack_total_size);
 
     packet_->header.data_size = header.data_size;
-    int data_len = recv(socket_, packet_->data, packet_->header.data_size, 0);
+    int data_len = recvn(socket_, packet_->data, packet_->header.data_size, 0);
     if (data_len == -1) {
       std::cerr << "Recv failed!" << std::endl;
       exit(1);
