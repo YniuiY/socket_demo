@@ -15,6 +15,8 @@ class Client {
   void Connect();
   void Send();
   void Recv();
+  void SendMsg();
+  void RecvMsg();
 
  private:
   int socket_;

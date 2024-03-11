@@ -31,6 +31,9 @@ class Server {
   int in_epoll_recv(int socket_fd);
   void in_epoll_send(int socket_fd);
 
+  int in_epoll_recvmsg(int sockfd);
+  void in_epoll_sendmsg(int sockfd);
+
   int sock_;
   int accept_sock_fd_;
   int epoll_fd_;

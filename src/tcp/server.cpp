@@ -178,7 +178,8 @@ void Server::run() {
 
       } else if (events[i].events & EPOLLIN) {
         // Client有数据到达，接收处理数据
-        if (in_epoll_recv(events[i].data.fd)) {
+        // if (in_epoll_recv(events[i].data.fd)) {
+        if (in_epoll_recvmsg(events[i].data.fd)) {
           // 将这个触发的socket，在epoll中变为等待可写，再次触发后发送数据给client
           epoll_event event;
           event.data.fd = events[i].data.fd;
@@ -196,7 +197,8 @@ void Server::run() {
         }
       } else if (events[i].events & EPOLLOUT) {
         // 发送数据到Client
-        in_epoll_send(events[i].data.fd);
+        // in_epoll_send(events[i].data.fd);
+        in_epoll_sendmsg(events[i].data.fd);
 
         // 数据发送完成后，将这个socket在epoll中恢复成等待可读
         epoll_event event;
@@ -245,10 +247,58 @@ int Server::in_epoll_recv(int socket_fd) {
   return ret;
 }
 
+int Server::in_epoll_recvmsg(int socket_fd) {
+  int ret{1};
+  int total_pack_size{0};
+  if (packet_ == nullptr) {
+    packet_ = (Packet*)malloc(sizeof(Packet));
+  } else {
+    total_pack_size = packet_->header.data_size + sizeof(Packet::header);
+    memset(packet_, 0, total_pack_size);
+  }
+
+  // peek header部分内容
+  int recv_header_size = recvn(socket_fd, &packet_->header.data_size, sizeof(Packet), MSG_PEEK);
+  if (recv_header_size != 0 && recv_header_size != sizeof(Packet::header)) {
+    std::cerr << "[in_epoll_recvmsg], recv header size: " << recv_header_size
+              << ", not equal to " << sizeof(Packet::header) << std::endl;
+    exit(1);
+  } else if (recv_header_size == 0) {
+    // 对端连接中断
+    std::cout << "[in_epoll_recvmsg], client close connect\n";
+    ret = 0;
+    return ret;
+  }
+  std::cout << "[in_epoll_recvmsg] recv header " << recv_header_size << " byte\n";
+  total_pack_size = packet_->header.data_size + sizeof(Packet::header);
+  packet_ = (Packet*)realloc(packet_, total_pack_size);
+  // 接收pack
+  msghdr recv_msg;
+  memset(&recv_msg, 0, sizeof(msghdr));
+  recv_msg.msg_iovlen = 2;
+  iovec iov[2];
+  iov[0].iov_base = &packet_->header;
+  iov[0].iov_len = sizeof(Packet::header);
+  iov[1].iov_base = packet_->data;
+  iov[1].iov_len = packet_->header.data_size;
+  recv_msg.msg_iov = iov;
+
+  int recv_pack_size = recvmsgn(socket_fd, &recv_msg, 0);
+  if (recv_pack_size != total_pack_size) {
+    std::cout << "[in_epoll_recvmsg] recv pack data failed, need recv size: "
+              << total_pack_size
+              << ", real recv size: " << recv_pack_size << std::endl;
+    exit(1);
+  }
+  std::string msg_str{packet_->data};
+  std::cout << "Recv client pack msg: " << msg_str << std::endl;
+  return ret;
+}
+
 void Server::in_epoll_send(int socket_fd) {
   int total_pack_size{0};
   if (packet_ == nullptr) {
-    packet_ = new Packet();
+    packet_ = (Packet*)malloc(sizeof(Packet));
   } else {
     total_pack_size = packet_->header.data_size + sizeof(Packet::header);
     memset(packet_, 0, total_pack_size);
@@ -262,6 +312,39 @@ void Server::in_epoll_send(int socket_fd) {
 
   total_pack_size = sizeof(Packet::header) + send_msg_str.size();
   int send_pack_size = sendn(socket_fd, packet_, total_pack_size, 0);
+  if (send_pack_size != total_pack_size) {
+    std::cerr << "Send pack failed, need send " << total_pack_size << " byte, real send: " << send_pack_size << " byte\n";
+    exit(1);
+  }
+  std::cout << "Send response to client: " << send_msg_str << std::endl;
+}
+
+void Server::in_epoll_sendmsg(int socket_fd) {
+  int total_pack_size{0};
+  if (packet_ == nullptr) {
+    packet_ = (Packet*)malloc(sizeof(Packet));
+  } else {
+    total_pack_size = packet_->header.data_size + sizeof(Packet::header);
+    memset(packet_, 0, total_pack_size);
+  }
+  std::string send_msg_str{"Hello Client, I'm Your Network Server"};
+  if (packet_->header.data_size < send_msg_str.size()) {
+    packet_ = (Packet*)realloc(packet_, sizeof(Packet::header) + send_msg_str.size());
+  }
+  strcpy(packet_->data, send_msg_str.c_str());
+  packet_->header.data_size = send_msg_str.size();
+  total_pack_size = sizeof(Packet::header) + send_msg_str.size();
+
+  msghdr send_msg;
+  memset(&send_msg, 0, sizeof(msghdr));
+  send_msg.msg_iovlen = 2;
+  iovec iov[2];
+  iov[0].iov_base = &packet_->header;
+  iov[0].iov_len = sizeof(Packet::header);
+  iov[1].iov_base = packet_->data;
+  iov[1].iov_len = packet_->header.data_size;
+  send_msg.msg_iov = iov;
+  int send_pack_size = sendmsg(socket_fd, &send_msg, 0);
   if (send_pack_size != total_pack_size) {
     std::cerr << "Send pack failed, need send " << total_pack_size << " byte, real send: " << send_pack_size << " byte\n";
     exit(1);
