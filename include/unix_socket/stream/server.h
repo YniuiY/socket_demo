@@ -30,7 +30,8 @@ class Server {
   int epollfd_;
   sockaddr_un server_addr_;
   std::string link_info_;
-  uint8_t buffer[MAX_BUFFER_SIZE];
+  uint8_t recv_buffer[MAX_BUFFER_SIZE];
+  uint8_t send_buffer[MAX_BUFFER_SIZE];
 };
 
 } // namespace stream

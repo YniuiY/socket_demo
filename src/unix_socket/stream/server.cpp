@@ -8,8 +8,6 @@ Server::Server():sockfd_{-1}, epollfd_{-1}, link_info_{"/tmp/server.sock"} {
   server_addr_.sun_family = AF_LOCAL;
   // 必须保证sun_path数组的最后一个字节是0
   strncpy(server_addr_.sun_path, link_info_.c_str(), sizeof(server_addr_.sun_path)-1);
-
-  memset(buffer, 0, MAX_BUFFER_SIZE);
 }
 
 Server::Server(std::string const& link_info):sockfd_{-1}, epollfd_{-1}, link_info_{link_info} {
@@ -17,8 +15,6 @@ Server::Server(std::string const& link_info):sockfd_{-1}, epollfd_{-1}, link_inf
   server_addr_.sun_family = AF_LOCAL;
   // 必须保证sun_path数组的最后一个字节是0
   strncpy(server_addr_.sun_path, link_info_.c_str(), sizeof(server_addr_.sun_path)-1);
-
-  memset(buffer, 0, MAX_BUFFER_SIZE);
 }
 
 Server::~Server() {
@@ -152,8 +148,9 @@ void Server::run() {
 }
 
 int Server::in_epoll_recvmsg(int sockfd) {
-  Packet* pack = new Packet();
-  memset(pack, 0, sizeof(Packet));
+  // 让pack指针指向定长数组，柔性数组就不再需要动态开辟内存
+  Packet* pack = (Packet*)recv_buffer;
+  memset(recv_buffer, 0, MAX_BUFFER_SIZE);
   int pack_header_size = sizeof(Packet::header);
 
   int recv_heade_size = recvn(sockfd, &pack->header, pack_header_size, MSG_PEEK);
@@ -170,7 +167,6 @@ int Server::in_epoll_recvmsg(int sockfd) {
   }
 
   int pack_data_size = pack->header.data_size;
-  pack = (Packet*)realloc(pack, sizeof(Packet) + pack_data_size);
 
   msghdr msg;
   memset(&msg, 0, sizeof(msg));
@@ -202,9 +198,10 @@ int Server::in_epoll_recvmsg(int sockfd) {
 
 void Server::in_epoll_sendmsg(int sockfd) {
   int total_pack_size{0};
-  Packet* pack = new Packet();
+  memset(send_buffer, 0, MAX_BUFFER_SIZE);
+  // 让pack指针指向定长数组，柔性数组就不再需要动态开辟内存
+  Packet* pack = (Packet*)send_buffer;
   std::string send_msg_str{"Hello Unix Domain Client, I'm Your Local Server"};
-  pack = (Packet*)realloc(pack, sizeof(Packet::header) + send_msg_str.size());
 
   strcpy(pack->data, send_msg_str.c_str());
   pack->header.data_size = send_msg_str.size();

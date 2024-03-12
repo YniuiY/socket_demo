@@ -51,11 +51,11 @@ void Client::Stop() {
 
 void Client::send_data() {
   std::string hello_msg{"Hello Unix Domain Server"};
-  Packet* pack = new Packet();
-  memset(pack, 0, sizeof(Packet));
+  memset(send_buffer, 0, sizeof(send_buffer));
+  // 让pack指针指向定长数组，柔性数组就不再需要动态开辟内存
+  Packet* pack = (Packet*)send_buffer;
   int pack_header_size = sizeof(Packet::header);
 
-  pack = (Packet*)realloc(pack, hello_msg.size() + pack_header_size);
   pack->header.data_size = hello_msg.size();
   strncpy(pack->data, hello_msg.c_str(), hello_msg.size());
 
@@ -82,8 +82,9 @@ void Client::send_data() {
 }
 
 void Client::recv_data() {
-  Packet* pack = new Packet();
-  memset(pack, 0, sizeof(Packet));
+  memset(recv_buffer, 0, sizeof(recv_buffer));
+  // 让pack指针指向定长数组，柔性数组就不再需要动态开辟内存
+  Packet* pack = (Packet*)recv_buffer;
   int pack_header_size{sizeof(Packet::header)};
 
   int recv_header_size = recvn(sockfd_, &pack->header, pack_header_size, MSG_PEEK);
@@ -101,8 +102,7 @@ void Client::recv_data() {
     std::cout << "Peek pack header success, pack data size is: " << pack->header.data_size << std::endl;
   }
 
-  pack = (Packet*)realloc(pack, pack_header_size + pack->header.data_size);
-  
+  // recv pack data
   msghdr msg;
   memset(&msg, 0, sizeof(msg));
   msg.msg_iovlen = 2;

@@ -8,6 +8,8 @@ namespace stream {
 
 class Client {
  public:
+  static constexpr int MAX_BUFFER_SIZE{65535};
+
   Client();
   explicit Client(std::string const& link_info);
   ~Client();
@@ -25,6 +27,8 @@ class Client {
   std::string link_info_;
   int sockfd_;
   sockaddr_un server_addr_;
+  uint8_t recv_buffer[MAX_BUFFER_SIZE];
+  uint8_t send_buffer[MAX_BUFFER_SIZE];
 };
 
 } // namespace stream
