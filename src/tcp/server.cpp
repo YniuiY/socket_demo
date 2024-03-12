@@ -251,7 +251,7 @@ int Server::in_epoll_recvmsg(int socket_fd) {
   int ret{1};
   int total_pack_size{0};
   if (packet_ == nullptr) {
-    packet_ = (Packet*)malloc(sizeof(Packet));
+    packet_ = new Packet();
   } else {
     total_pack_size = packet_->header.data_size + sizeof(Packet::header);
     memset(packet_, 0, total_pack_size);
@@ -298,7 +298,7 @@ int Server::in_epoll_recvmsg(int socket_fd) {
 void Server::in_epoll_send(int socket_fd) {
   int total_pack_size{0};
   if (packet_ == nullptr) {
-    packet_ = (Packet*)malloc(sizeof(Packet));
+    packet_ = new Packet();
   } else {
     total_pack_size = packet_->header.data_size + sizeof(Packet::header);
     memset(packet_, 0, total_pack_size);
@@ -322,7 +322,7 @@ void Server::in_epoll_send(int socket_fd) {
 void Server::in_epoll_sendmsg(int socket_fd) {
   int total_pack_size{0};
   if (packet_ == nullptr) {
-    packet_ = (Packet*)malloc(sizeof(Packet));
+    packet_ = new Packet();
   } else {
     total_pack_size = packet_->header.data_size + sizeof(Packet::header);
     memset(packet_, 0, total_pack_size);

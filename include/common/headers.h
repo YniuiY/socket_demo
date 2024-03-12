@@ -11,7 +11,9 @@
 #include <sys/epoll.h>
 #include <unistd.h>
 #include <cstring>
+#include <thread>
 
-#include "packet.h"
+#include "common/packet.h"
+#include "common/transfer.h"
 
 #endif //HEADERS_H_

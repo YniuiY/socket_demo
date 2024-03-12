@@ -2,6 +2,8 @@
 #include "tcp/server.h"
 #include "udp/udp_server.h"
 #include "udp/udp_client.h"
+#include "unix_socket/stream/server.h"
+#include "unix_socket/stream/client.h"
 
 int main (int argc, char* argv[]) {
   bool is_unix_possible{false};
@@ -56,10 +58,23 @@ int main (int argc, char* argv[]) {
     client.Start();
   } else if (is_unix_possible && h0.compare(argv[1]) == 0 && h3.compare(argv[2]) == 0) {
     // unix stream server
-  } else if (is_unix_possible && h1.compare(argv[1]) == 0 && h3.compare(argv[2]) == 0) {
-    // unix data gram server
+    std::string link_info{"/tmp/server.sock"};
+    unix_domain::stream::Server server(link_info);
+    server.Socket();
+    server.Bind();
+    server.Listen();
+    server.Start();
+    server.Stop();
   } else if (is_unix_possible && h0.compare(argv[1]) == 0 && h4.compare(argv[2]) == 0) {
     // unix stream client
+    std::string link_info{"/tmp/server.sock"};
+    unix_domain::stream::Client client(link_info);
+    client.Socket();
+    client.Connect();
+    client.Start();
+    client.Stop();
+  } else if (is_unix_possible && h1.compare(argv[1]) == 0 && h3.compare(argv[2]) == 0) {
+    // unix data gram server
   } else if (is_unix_possible && h1.compare(argv[1]) == 0 && h4.compare(argv[2]) == 0) {
     // unix data gram client
   } else {

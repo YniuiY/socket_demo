@@ -15,11 +15,12 @@ message("PROJECT_SOURCE_DIR: " ${PROJECT_SOURCE_DIR})
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/common COMM_SRC)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/tcp TCP_SRC)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src/udp UDP_SRC)
-aux_source_directory(${PROJECT_SOURCE_DIR}/src/unix_socket UN_SRC)
+aux_source_directory(${PROJECT_SOURCE_DIR}/src/unix_socket/stream UN_STREAM_SRC)
+aux_source_directory(${PROJECT_SOURCE_DIR}/src/unix_socket/data_gram UN_DG_SRC)
 aux_source_directory(${PROJECT_SOURCE_DIR}/src MAIN)
 
 message("TCP_SRC: " ${TCP_SRC})
 
-add_executable(run ${MAIN} ${COMM_SRC} ${TCP_SRC} ${UDP_SRC} ${UN_SRC})
+add_executable(run ${MAIN} ${COMM_SRC} ${TCP_SRC} ${UDP_SRC} ${UN_STREAM_SRC} ${UN_DG_SRC})
 
 target_link_libraries(run pthread)

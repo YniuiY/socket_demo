@@ -1,5 +1,5 @@
-#ifndef CLIENT_H_
-#define CLIENT_H_
+#ifndef TCP_CLIENT_H_
+#define TCP_CLIENT_H_
 
 #include "common/headers.h"
 
@@ -25,4 +25,4 @@ class Client {
 };
 
 }
-#endif
+#endif // TCP_CLIENT_H_

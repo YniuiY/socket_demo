@@ -1,5 +1,5 @@
-#ifndef SERVER_H_
-#define SERVER_H_
+#ifndef TCP_SERVER_H_
+#define TCP_SERVER_H_
 
 #include "common/headers.h"
 #include "common/transfer.h"
@@ -43,4 +43,4 @@ class Server {
 
 }
 
-#endif
+#endif //TCP_SERVER_H_

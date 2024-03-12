@@ -19,7 +19,7 @@ namespace udp {
 class UpdServer {
  public:
   UpdServer();
-  UpdServer(int const& port);
+  explicit UpdServer(int const& port);
   ~UpdServer();
 
   void Socket();

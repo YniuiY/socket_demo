@@ -134,13 +134,13 @@ void Client::SendMsg() {
 }
 
 void Client::RecvMsg() {
-  // std::this_thread::sleep_for(std::chrono::milliseconds(100));
   int total_pack_size = -1;
   Packet* pack{nullptr};
   pack = new Packet();
   total_pack_size = sizeof(Packet);
   memset(pack, 0, total_pack_size);
 
+  // peek 一下数据包的头部内容
   int recv_header_size = recvn(socket_, &pack->header, sizeof(Packet::header), MSG_PEEK);
   if (recv_header_size < 0) {
     std::cerr << "peek header failed, " << strerror(errno) << std::endl;
@@ -156,11 +156,13 @@ void Client::RecvMsg() {
     std::cout << "peek pack header success, pack data size: " << pack->header.data_size << std::endl;
   }
 
+  // 根据数据包头部的payload大小，开更大的内存用于接收完整的pack
   if (pack->header.data_size > total_pack_size - sizeof(Packet::header)) {
     pack = (Packet*)realloc(pack, pack->header.data_size + sizeof(Packet::header));
     total_pack_size = pack->header.data_size + sizeof(Packet::header);
   }
 
+  // 接收完整的pack
   msghdr recv_msg;
   memset(&recv_msg, 0, sizeof(msghdr));
   recv_msg.msg_iovlen = 2;
@@ -170,7 +172,7 @@ void Client::RecvMsg() {
   iov[1].iov_base = pack->data;
   iov[1].iov_len = pack->header.data_size;
   recv_msg.msg_iov = iov;
-  
+
   int nread = recvmsgn(socket_, &recv_msg, 0);
   if (nread < 0) {
     std::cerr << "recvmsgn failed, " << strerror(errno) << std::endl;
