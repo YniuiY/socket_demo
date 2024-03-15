@@ -5,6 +5,9 @@
 #include "unix_socket/stream/server.h"
 #include "unix_socket/stream/client.h"
 
+// 多播IP，多播网卡接口使用INADDR_ANY，内核从主机现有网卡中分配一个，也可以明确指定
+static const std::string MULTI_CAST_IP = "224.0.1.5";
+
 int main (int argc, char* argv[]) {
   bool is_unix_possible{false};
   switch (argc) {
@@ -45,16 +48,22 @@ int main (int argc, char* argv[]) {
   } else if (!is_unix_possible && h1.compare(argv[1]) == 0 && h3.compare(argv[2]) == 0) {
     //udp server
     int port{51016};
-    udp::UpdServer server(port);
-    server.Socket();
+    bool is_access_multi_cast{true};
+    // udp::UpdServer server(port);
+    // 加入多播组的服务端，具备了接收多播报文的能力
+    udp::UpdServer server(port, MULTI_CAST_IP);
+    server.Socket(is_access_multi_cast);
     server.Bind();
     server.Start();
   } else if (!is_unix_possible && h1.compare(argv[1]) == 0 && h4.compare(argv[2]) == 0) {
     // udp client
-    std::string ip{"172.17.50.226"};
+    bool is_broadcast = false;
+    std::string ip{"10.1.2.255"};
+    // 客户端向多播地址发送数据
+    ip = MULTI_CAST_IP;
     int port{51016};
     udp::UdpClient client(ip, port);
-    client.Socket();
+    client.Socket(is_broadcast);
     client.Start();
   } else if (is_unix_possible && h0.compare(argv[1]) == 0 && h3.compare(argv[2]) == 0) {
     // unix stream server

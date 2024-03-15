@@ -21,7 +21,7 @@ class UdpClient {
   UdpClient(std::string const& server_ip, int const& port);
   ~UdpClient();
 
-  void Socket();
+  void Socket(bool is_broadcast);
   void Start();
 
  private:
@@ -30,8 +30,8 @@ class UdpClient {
 
   sockaddr_in server_addr_;
   int socket_fd_;
-  Packet* packet_;
-  char buffer[MAX_UDP_DATA_SIZE];
+  uint8_t recv_buffer[MAX_UDP_DATA_SIZE];
+  uint8_t send_buffer[MAX_UDP_DATA_SIZE];
 };
 } // namespace udp
 

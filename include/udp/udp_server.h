@@ -20,9 +20,10 @@ class UpdServer {
  public:
   UpdServer();
   explicit UpdServer(int const& port);
+  UpdServer(int const& port, std::string const& ip);
   ~UpdServer();
 
-  void Socket();
+  void Socket(bool is_multi_cast);
   void Bind();
   void Start();
  
@@ -32,11 +33,11 @@ class UpdServer {
   void send_data();
 
   int server_socket_;
+  std::string multi_cast_ip_;
   sockaddr_in server_addr_;
   sockaddr_in client_addr_;
-  int epoll_fd_;
-  Packet* packet_;
-  char buffer[MAX_UDP_DATA_SIZE];
+  uint8_t recv_buffer[MAX_UDP_DATA_SIZE];
+  uint8_t send_buffer[MAX_UDP_DATA_SIZE];
 };
 
 } // namespace udp
