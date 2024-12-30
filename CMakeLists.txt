@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.1.0)
 
 project(Network)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 add_definitions("-Wall -g")
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)

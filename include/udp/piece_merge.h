@@ -20,6 +20,7 @@ static constexpr uint32_t KNON_PIECE{1125};
 
 struct CommonHeader {
   uint32_t msg_type; // 1130表示分片，1125表示未分片
+  uint32_t total_sub_pkt_num; // 子包数量
 };
 
 // 子包头部信息
@@ -42,7 +43,7 @@ static constexpr uint32_t HEADER_SIZE{sizeof(SubPktHeader)};
 // 子包合并缓存区
 struct PktMerge {
   uint32_t seq;           // 整包序列号
-  uint32_t sub_pkt_num;   // 子包数量
+  uint32_t merged_pkt_num;   // 合入的子包数量
   uint32_t total_size;    // 整包数据大小
   uint8_t* merge_buffer;  // 整包合并缓冲区
 };
@@ -64,11 +65,11 @@ class PieceMerge {
   /// @param data 合并后的整包数据，合并前nullptr
   /// @param client_addr 子包发送端地址
   /// @return 合并成功返回true，否则返回false
-  bool MergeSubPackge(SubPkt* sub_pkt, uint8_t* data, std::string const& client_addr);
+  bool MergeSubPackge(SubPkt* sub_pkt, uint8_t*& data, std::string const& client_addr);
 
  private:
-  // 用于存储多端点的合并信息, key为端点地址{地址:端口 或 ipc绝对地址} value为PktMerge
-  std::unordered_map<std::string, PktMerge> multi_point_merge_map_;
+  // 用于存储多端点的合并信息, key为端点地址{地址:端口 或 ipc绝对地址} value为{Seq,PktMerge}
+  std::unordered_map<std::string, std::unordered_map<uint32_t, PktMerge>> multi_point_merge_map_;
   // 用于存储多端点的序列号, key为端点地址{地址:端口 或 ipc绝对地址} value为序列号，保证同一个目的地址序列号唯一
   std::unordered_map<std::string, uint32_t> multi_point_seq_map_;
 };
