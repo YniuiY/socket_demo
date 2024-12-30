@@ -18,6 +18,7 @@ namespace piece_merge{
 static constexpr uint32_t KPIECE{1130};
 static constexpr uint32_t KNON_PIECE{1125};
 
+// 公共包头
 struct CommonHeader {
   uint32_t msg_type; // 1130表示分片，1125表示未分片
   uint32_t total_sub_pkt_num; // 子包数量

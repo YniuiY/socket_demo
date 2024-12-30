@@ -14,6 +14,7 @@ std::vector<SubPkt> PieceMerge::CutPackage(uint8_t* data, uint32_t data_size, st
   uint32_t sub_pkt_nums = (data_size % MAX_UDP_DATA_SIZE) > 0? data_size/MAX_UDP_DATA_SIZE + 1 : data_size/MAX_UDP_DATA_SIZE;
   if (sub_pkt_nums <= 1) {
     // 数据不分片
+    std::cout << "CutPackage: Not need to cut package" << std::endl;
     sub_pkt.header.comm_header.msg_type = KNON_PIECE;
     sub_pkts.emplace_back(sub_pkt);
   } else {
@@ -53,6 +54,15 @@ std::vector<SubPkt> PieceMerge::CutPackage(uint8_t* data, uint32_t data_size, st
 
 bool PieceMerge::MergeSubPackge(SubPkt* sub_pkt, uint8_t*& data, std::string const& client_addr) {
   bool ret{false};
+  if (sub_pkt->header.comm_header.msg_type == KNON_PIECE) {
+    // 非分片包
+    std::cout << "MergeSubPackge: Non-piece package" << std::endl;
+    if (data) {
+      memcpy(data, sub_pkt->payload, sub_pkt->header.payload_size);
+      ret = true;
+    }
+    return ret;
+  }
   auto pkt_merge_index = multi_point_merge_map_.find(client_addr);
   if (pkt_merge_index == multi_point_merge_map_.end()) {
     // 第一次收到这个源地址的包

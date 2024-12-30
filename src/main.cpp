@@ -94,8 +94,9 @@ int main (int argc, char* argv[]) {
     // UDP子包合并测试
     uint8_t* merged_buffer_ptr{nullptr};
     std::string big_string = BIG_STR;
+    std::string littel_string = LITTEL_STR;
     udp::piece_merge::PieceMerge piece_merge;
-    std::vector<udp::piece_merge::SubPkt> sub_pkts = piece_merge.CutPackage((uint8_t*)big_string.c_str(), big_string.size(), "114514");
+    std::vector<udp::piece_merge::SubPkt> sub_pkts = piece_merge.CutPackage((uint8_t*)littel_string.c_str(), littel_string.size(), "114514");
     for (auto &sub_pkt : sub_pkts) {
       std::cout << "sub pkt index:" << sub_pkt.header.index << std::endl;
       if (sub_pkt.header.index == 0) {
